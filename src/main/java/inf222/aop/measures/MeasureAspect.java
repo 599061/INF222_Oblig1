@@ -27,14 +27,24 @@ public class MeasureAspect {
         pattern = Pattern.compile(regex);
     }
 
+    @Around("get(double inf222.aop.measures..*)")
+    public Object handleFieldAccess(ProceedingJoinPoint jp) throws Throwable {
+        double value = (double) jp.proceed();
+        Matcher matcher = pattern.matcher(jp.getSignature().getName());
 
-    @Around("set(double) * && !cflow(execution(*.new(..)))")
-    void someMethod(ProceedingJoinPoint jp) throws Throwable {
+        if (matcher.matches()) {
+            return value * toMeter.get(matcher.group(1));
+        }
+        return value;
+    }
+
+    @Around("set(double inf222.aop.measures..*) && !cflow(execution(*.new(..)))")
+    public void handleFieldModification(ProceedingJoinPoint jp) throws Throwable {
 
         double newValue = (double) jp.getArgs()[0];
 
         if (newValue < 0) {
-            throw new IllegalArgumentException("Measure values cannot be negative: " + newValue);
+            throw new Error("Illegal modification");
         }
 
         String fieldName = jp.getSignature().getName();
@@ -46,11 +56,10 @@ public class MeasureAspect {
 
             double correctedValue = newValue / rate;
 
-            jp.proceed(new Object[] { correctedValue });
+            jp.proceed(new Object[] {correctedValue});
+        } else {
+            jp.proceed();
         }
-
-        jp.proceed(new Object[] {10.0});
     }
-    // TODO other methods
 
 }
