@@ -1,0 +1,56 @@
+package inf222.aop.measures;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@Aspect
+public class MeasureAspect {
+    private final String regex;
+    private final Pattern pattern;
+
+    private final Map<String, Double> toMeter = new HashMap<String, Double>(Map.of(
+            "m", 1d,
+            "ft", 0.3048d,
+            "in", 0.0254d,
+            "cm", 0.01d,
+            "yd", 0.9144d));
+
+    public MeasureAspect() {
+        String elems = String.join("|", toMeter.keySet());
+        regex = String.format(".*_(%s)$", elems);
+        pattern = Pattern.compile(regex);
+    }
+
+
+    @Around("set(double) * && !cflow(execution(*.new(..)))")
+    void someMethod(ProceedingJoinPoint jp) throws Throwable {
+
+        double newValue = (double) jp.getArgs()[0];
+
+        if (newValue < 0) {
+            throw new IllegalArgumentException("Measure values cannot be negative: " + newValue);
+        }
+
+        String fieldName = jp.getSignature().getName();
+        Matcher matcher = pattern.matcher(fieldName);
+
+        if (matcher.matches()) {
+            String unit = matcher.group(1);
+            double rate = toMeter.get(unit);
+
+            double correctedValue = newValue / rate;
+
+            jp.proceed(new Object[] { correctedValue });
+        }
+
+        jp.proceed(new Object[] {10.0});
+    }
+    // TODO other methods
+
+}
