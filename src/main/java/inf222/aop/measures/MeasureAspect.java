@@ -30,40 +30,25 @@ public class MeasureAspect {
     }
 
     @Before("set(double inf222.aop.measures..*)")
-    public void validatePositiveValue(JoinPoint jp) {
-        double newValue = (double) jp.getArgs()[0];
-
-        if (newValue < 0) {
+    public void validate(JoinPoint jp) {
+        if ((double) jp.getArgs()[0] < 0) {
             throw new Error("Illegal modification");
         }
     }
 
     @Around("get(double inf222.aop.measures..*)")
-    public Object handleFieldAccess(ProceedingJoinPoint jp) throws Throwable {
-        double value = (double) jp.proceed();
-        Matcher matcher = pattern.matcher(jp.getSignature().getName());
-
-        if (matcher.matches()) {
-            return value * toMeter.get(matcher.group(1));
-        }
-        return value;
+    public Object handleAccess(ProceedingJoinPoint jp) throws Throwable {
+        double val = (double) jp.proceed();
+        Matcher m = pattern.matcher(jp.getSignature().getName());
+        return m.matches() ? val * toMeter.get(m.group(1)) : val;
     }
 
     @Around("set(double inf222.aop.measures..*) && !cflow(execution(*.new(..)))")
-    public void handleFieldModification(ProceedingJoinPoint jp) throws Throwable {
-
-        double newValue = (double) jp.getArgs()[0];
-
-        String fieldName = jp.getSignature().getName();
-        Matcher matcher = pattern.matcher(fieldName);
-
-        if (matcher.matches()) {
-            String unit = matcher.group(1);
-            double rate = toMeter.get(unit);
-
-            double correctedValue = newValue / rate;
-
-            jp.proceed(new Object[] {correctedValue});
+    public void handleModification(ProceedingJoinPoint jp) throws Throwable {
+        double val = (double) jp.getArgs()[0];
+        Matcher m = pattern.matcher(jp.getSignature().getName());
+        if (m.matches()) {
+            jp.proceed(new Object[]{ val / toMeter.get(m.group(1)) });
         } else {
             jp.proceed();
         }

@@ -19,7 +19,7 @@ public class Measures {
     }
 
     public void runExample() {
-        System.out.println("Initial Values:");
+        System.out.println("Initial Values:\n");
         printValues();
 
         w_in += a_m * 2;
