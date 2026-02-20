@@ -1,8 +1,10 @@
 package inf222.aop.measures;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,15 @@ public class MeasureAspect {
         pattern = Pattern.compile(regex);
     }
 
+    @Before("set(double inf222.aop.measures..*)")
+    public void validatePositiveValue(JoinPoint jp) {
+        double newValue = (double) jp.getArgs()[0];
+
+        if (newValue < 0) {
+            throw new Error("Illegal modification");
+        }
+    }
+
     @Around("get(double inf222.aop.measures..*)")
     public Object handleFieldAccess(ProceedingJoinPoint jp) throws Throwable {
         double value = (double) jp.proceed();
@@ -42,10 +53,6 @@ public class MeasureAspect {
     public void handleFieldModification(ProceedingJoinPoint jp) throws Throwable {
 
         double newValue = (double) jp.getArgs()[0];
-
-        if (newValue < 0) {
-            throw new Error("Illegal modification");
-        }
 
         String fieldName = jp.getSignature().getName();
         Matcher matcher = pattern.matcher(fieldName);
