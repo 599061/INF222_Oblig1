@@ -19,7 +19,7 @@ public class Measures {
     }
 
     public void runExample() {
-        System.out.println("Initial Values:\n");
+        System.out.print("Initial Values:\n");
         printValues();
 
         w_in += a_m * 2;
@@ -29,7 +29,7 @@ public class Measures {
         b_yd += 1.5;
         // b_yd = -2; // illegal
 
-        System.out.println("\nAfter First Operations:");
+        System.out.print("\nAfter First Operations:\n");
         printValues();
 
         double volume = l_ft * w_in * h_cm;
@@ -37,19 +37,19 @@ public class Measures {
         double average = sum / 5;
         double difference = l_ft - a_m;
 
-        System.out.println("\nComputed Values:");
-        System.out.println("Volume of box: " + volume);
-        System.out.println("Sum of all distances: " + sum);
-        System.out.println("Average value: " + average);
-        System.out.println("Difference (ft - m): " + difference);
+        System.out.print("\nComputed Values:\n");
+        System.out.print("Volume of box: " + volume + "\n");
+        System.out.print("Sum of all distances: " + sum + "\n");
+        System.out.print("Average value: " + average + "\n");
+        System.out.print("Difference (ft - m): " + difference + "\n");
     }
 
     private void printValues() {
-        System.out.println("l_ft: " + l_ft);
-        System.out.println("w_in: " + w_in);
-        System.out.println("h_cm: " + h_cm);
-        System.out.println("a_m: " + a_m);
-        System.out.println("b_yd: " + b_yd);
+        System.out.print("l_ft: " + l_ft + "\n");
+        System.out.print("w_in: " + w_in + "\n");
+        System.out.print("h_cm: " + h_cm + "\n");
+        System.out.print("a_m: " + a_m + "\n");
+        System.out.print("b_yd: " + b_yd + "\n");
     }
 
     public void assignNegativeValue() {
